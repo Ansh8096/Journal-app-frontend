@@ -10,7 +10,7 @@ type DashboardLayoutProps= {
 
 export default function DashboardLayout({
     children
-    }:DashboardLayoutProps)  // ':DashboardLayoutProps' -> props must follow DashboardLayoutProps
+    }:DashboardLayoutProps)  // 'DashboardLayoutProps' -> props must follow DashboardLayoutProps
 {
 
     const [collapsed, setCollapsed] = useState(false);

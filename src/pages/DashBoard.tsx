@@ -23,7 +23,6 @@ const recentJournals = [
 ];
 
 function DashBoard() {
-    
     return (
         <DashboardLayout >
 
@@ -263,7 +262,6 @@ function DashBoard() {
                         
                     </CardContent>
                 </Card>
-
 
             </div>
 

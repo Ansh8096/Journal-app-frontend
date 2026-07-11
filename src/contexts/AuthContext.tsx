@@ -36,7 +36,7 @@ export function AuthProvider ({
 
         const profile  = await userService.getProfile();
         setUser(profile);
-        console.log("User profile fetched after login: ", profile);
+        console.log("RefreshUser method called, user profile fetched: ", profile);
         
     },[])
 

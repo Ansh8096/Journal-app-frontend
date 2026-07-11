@@ -8,7 +8,7 @@ import {
     signupDefaultValues,
     signupSchema,
     type SignupFormValues,
-} from "@/schemas/auth.schema";
+} from "@/schemas/auth/auth.schema";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -28,6 +28,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
 import authService  from "@/services/auth.service";
 import { ROUTES } from "@/constants/routes";
+import { toast } from "sonner";
+import { getErrorMessage } from "@/lib/error";
+import { applyServerFormError } from "@/lib/forms/server-form-error";
 
 const SignupForm = () => {
 
@@ -48,10 +51,7 @@ const SignupForm = () => {
         
         try {
             // today SignupFormValues and RegisterRequest is same, so we don't need to map them...
-            const response = await authService.signup(values);
-
-            console.log("Signup method called: ", response);
-            
+            await authService.signup(values);            
             navigate(ROUTES.LOGIN,{
                 replace: true,
                 state: {
@@ -60,8 +60,8 @@ const SignupForm = () => {
             })
 
         } catch (error) {
-
-            console.error("Signup failed:", error);            
+            if(applyServerFormError(error, form)) return;
+            toast.error(getErrorMessage(error));            
         }
 
     };

@@ -5,6 +5,23 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@keyframes breathe {
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.8;
+        transform: scale(1.02);
+    }
+}
+
+.animate-breathe {
+    animation: breathe 2s ease-in-out infinite;
+}
+
 @theme inline {
     --font-heading: var(--font-sans);
     --font-sans: 'Inter Variable', sans-serif;

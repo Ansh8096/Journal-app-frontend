@@ -21,10 +21,13 @@ import {
     loginDefaultValues,
     loginSchema,
     type LoginFormValues,
-} from "@/schemas/auth.schema";
+} from "@/schemas/auth/auth.schema";
 
 import { useAuth } from "@/hooks/useAuth";
 import { ROUTES } from "@/constants/routes";
+import { useEffect } from "react";
+import { toast } from "sonner";
+import { getErrorMessage } from "@/lib/error";
 
 const LoginForm = () => {
 
@@ -32,14 +35,11 @@ const LoginForm = () => {
     const navigate = useNavigate();
 
     const location = useLocation();
-    console.log("Message from signup page: ", location.state);
-    
-    // TODO: Use a global Toast....
-    // useEffect(() => {
-    //     if (location.state?.message) {
-    //         Toast.(location.state.message);
-    //     }
-    // }, [location.state]);
+    useEffect(() => {
+        if (location.state?.message) {
+            toast.success(location.state.message);
+        }
+    }, [location.state]);
     
     const form = useForm<LoginFormValues>({
         resolver: zodResolver(loginSchema),
@@ -55,8 +55,7 @@ const LoginForm = () => {
             });
 
         } catch (error) {
-            // TODO: Later replace console.error with a toast...
-            console.error(error);
+            toast.error(getErrorMessage(error));
         }
     };
 

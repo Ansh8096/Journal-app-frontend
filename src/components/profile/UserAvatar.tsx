@@ -1,0 +1,116 @@
+import { useState } from "react";
+import { Camera } from "lucide-react";
+
+import {
+    Avatar,
+    AvatarFallback,
+    AvatarImage,
+} from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+
+import { useAuth } from "@/hooks/useAuth";
+
+import { profileConfig } from "./Config";
+
+import { getUserInitials } from "@/utils/user";
+import { formatDate } from "@/utils/date";
+
+import { ChangeAvatarDialog } from "./dialogs/Index";
+
+export function UserAvatar() {
+    const { user } = useAuth();
+
+    const [avatarDialogOpen, setAvatarDialogOpen] = useState(false);
+
+    if (!user) {
+        return null;
+    }
+
+    const initials = getUserInitials(user.username);
+
+    return (
+        <>
+            <div className="h-fit rounded-xl border bg-card p-8 shadow-sm">
+                <div className="flex flex-col items-center text-center">
+                    {/* Avatar */}
+
+                    <button
+                        type="button"
+                        aria-label="Change profile photo"
+                        className="group relative"
+                        onClick={() => setAvatarDialogOpen(true)}
+                    >
+                        <Avatar className="h-44 w-44 border-2 shadow-md">
+                            <AvatarImage
+                                src={user.profileImageUrl ?? undefined}
+                                alt={user.username}
+                            />
+
+                            <AvatarFallback className="text-5xl font-semibold">
+                                {initials}
+                            </AvatarFallback>
+                        </Avatar>
+
+                        {/* Hover Overlay */}
+
+                        <div
+                            className="
+                                absolute inset-0
+                                flex items-center justify-center
+                                rounded-full
+                                bg-black/50
+                                opacity-0
+                                transition-opacity duration-200
+                                group-hover:opacity-100
+                                group-focus-visible:opacity-100
+                            "
+                        >
+                            <div className="flex flex-col items-center gap-1 text-white">
+                                <Camera className="h-7 w-7" />
+
+                                <span className="text-xs font-medium">
+                                    Change Photo
+                                </span>
+                            </div>
+                        </div>
+                    </button>
+
+                    {/* Username */}
+
+                    <h2 className="mt-5 text-3xl font-bold tracking-tight">
+                        {user.username}
+                    </h2>
+
+                    {/* Email */}
+
+                    <p className="mt-1 text-sm text-muted-foreground">
+                        {user.email}
+                    </p>
+
+                    {/* Member Since */}
+
+                    <p className="mt-2 text-xs text-muted-foreground">
+                        Member since {formatDate(user.createdAt)}
+                    </p>
+
+                    {/* Upload Button */}
+
+                    <Button
+                        variant="outline"
+                        className="mt-8 w-full"
+                        onClick={() => setAvatarDialogOpen(true)}
+                    >
+                        <Camera className="mr-2 h-4 w-4" />
+
+                        {profileConfig.avatar.uploadButton}
+                    </Button>
+                </div>
+            </div>
+
+            <ChangeAvatarDialog
+                open={avatarDialogOpen}
+                onOpenChange={setAvatarDialogOpen}
+            />
+        </>
+    );
+}

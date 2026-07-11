@@ -16,7 +16,7 @@ class AuthApi{
             "/auth/login",
             request
         );
-
+        console.log("user is logged in, response: " , data);
         return data;
     }
 
@@ -26,6 +26,7 @@ class AuthApi{
             request
         )
         
+        console.log("user is created, response: " , data.message);
         return data;
     }
 }

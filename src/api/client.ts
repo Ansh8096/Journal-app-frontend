@@ -1,6 +1,7 @@
 import axios from "axios"
 import storage from "@/utils/storage";
 import { STORAGE_KEYS } from "@/constants/storage";
+import { handleResponse, handleResponseError } from "./responseInterceptor";
 
 const client = axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -27,10 +28,9 @@ client.interceptors.request.use(
 
 
 client.interceptors.response.use(
-    (response) => {
-        return response;
-    },
-
+    handleResponse, // handling the response...
+    
+    // handling error...
     (error) => {
 
         // means the jwt is expired...
@@ -41,7 +41,8 @@ client.interceptors.response.use(
             // TODO: AuthContext will handle redirecting the user to /login
         }
 
-        return Promise.reject(error);
+        // handling the error...
+        return handleResponseError(error);
     }
 );
 

@@ -22,11 +22,7 @@ class AuthService{
 
     async login(request: LoginRequest): Promise<LoginResponse>{
         const response = await authApi.login(request);
-
-        console.log("Response after login from authService: " , response);
-
         this.saveAccessToken(response.accessToken)
-
         return response;
     } 
 

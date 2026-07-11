@@ -7,9 +7,11 @@ import type {
     ChangeEmailRequest,
     ChangeUsernameRequest,
     DeleteAccountRequest,
+    ProfileImageResponse,
 } from "@/types/api/user";
 
 import type { MessageResponse } from "@/types/api/common";
+import type { AuthResponse } from "@/types/api/auth";
 
 
 class UserService{
@@ -22,6 +24,13 @@ class UserService{
         return await userApi.updateProfile(request);
     }
 
+    async uploadProfileImage(image: File): Promise<ProfileImageResponse>{
+        const formData = new FormData();
+        formData.append("image", image);
+
+        return await userApi.UploadProfileImage(formData);
+    }
+
     async changePassword(request: ChangePasswordRequest) : Promise<MessageResponse>{
         return await userApi.changePassword(request);
     }
@@ -30,7 +39,7 @@ class UserService{
         return await userApi.changeEmail(request);
     }
 
-    async changeUsername(request: ChangeUsernameRequest): Promise<MessageResponse> {
+    async changeUsername(request: ChangeUsernameRequest): Promise<AuthResponse> {
         return await userApi.changeUsername(request);
     }
 

@@ -15,8 +15,10 @@ export interface UserProfile {
     email: string;
     city: string;
     sentimentAnalysisEnabled: boolean;
+    profileImageUrl: string | null;
     roles: Role[];
     createdAt: string;
+    updatedAt: string;
 }
 
 export interface UpdateProfileRequest {
@@ -41,4 +43,9 @@ export interface ChangeUsernameRequest {
 
 export interface DeleteAccountRequest {
     password: string;
+}
+
+export interface ProfileImageResponse{
+    message: string;
+    profileImageUrl: string; 
 }

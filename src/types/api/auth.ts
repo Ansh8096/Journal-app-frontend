@@ -18,3 +18,9 @@ export interface RegisterRequest {
     city: string;
     sentimentAnalysisEnabled: boolean;
 }
+
+export interface AuthResponse{
+    message: string;
+    accessToken: string;
+    tokenType: string;
+}

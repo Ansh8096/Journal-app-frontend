@@ -1,6 +1,6 @@
 import { Loader2 } from "lucide-react";
 
-import logo from "@/assets/journalflow-logo-2.svg";
+import logo from "@/assets/logo-2.png";
 
 interface FullscreenLoaderProps {
     message?: string;

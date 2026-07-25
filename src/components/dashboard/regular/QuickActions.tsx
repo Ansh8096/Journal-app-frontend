@@ -1,13 +1,13 @@
 import { Card, CardContent } from "@/components/ui/card";
 
 import QuickActionCard from "./QuickActionCard";
-import { quickActions } from "./Config";
+import { regularDashboardConfig } from "./Config";
 
 const QuickActions = () => {
     return (
         <Card>
 
-            <CardContent className="space-y-6 p-8">
+            <CardContent className="space-y-4 p-6">
 
                 <div>
 
@@ -29,7 +29,7 @@ const QuickActions = () => {
                         xl:grid-cols-4
                     "
                 >
-                    {quickActions.map((action) => (
+                    {regularDashboardConfig.quickActions.items.map((action) => (
                         <QuickActionCard
                             key={action.href}
                             action={action}

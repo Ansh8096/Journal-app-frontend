@@ -2,21 +2,19 @@ import { Link } from "react-router-dom";
 
 import { Card, CardContent } from "@/components/ui/card";
 
-import type { QuickActionConfig } from "./Config";
+import type { QuickAction } from "./Config"
 
-type QuickActionCardProps = {
-    action: QuickActionConfig;
-};
+interface QuickActionCardProps {
+    action: QuickAction;
+}
 
-const QuickActionCard = ({
+export default function QuickActionCard({
     action,
-}: QuickActionCardProps) => {
-
+}: QuickActionCardProps) {
     const Icon = action.icon;
 
     return (
         <Link to={action.href}>
-
             <Card
                 className="
                     h-full
@@ -40,8 +38,7 @@ const QuickActionCard = ({
                         text-center
                     "
                 >
-
-                    <Icon className="mb-3 h-8 w-8" />
+                    <Icon className="mb-3 h-8 w-8 text-primary" />
 
                     <h3 className="font-semibold">
                         {action.title}
@@ -50,13 +47,8 @@ const QuickActionCard = ({
                     <p className="mt-2 text-sm text-muted-foreground">
                         {action.description}
                     </p>
-
                 </CardContent>
-
             </Card>
-
         </Link>
     );
-};
-
-export default QuickActionCard;
+}

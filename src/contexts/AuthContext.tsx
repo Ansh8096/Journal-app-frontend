@@ -28,8 +28,8 @@ export function AuthProvider ({
 } : AuthProviderProps){
 
     const [user, setUser] = useState<UserProfile | null>(null);
-    const [loading, setLoading] = useState<boolean>(false);
-    const isAuthenticated = user !== null;
+    const [loading, setLoading] = useState<boolean>(true);
+    const isAuthenticated = (user !== null);
 
     // Using useCallback keeps the function reference stable...
     const refreshUser = useCallback(async() : Promise<void> =>{
@@ -46,7 +46,7 @@ export function AuthProvider ({
             await authService.login(request);
 
             await refreshUser(); // we call this beacuse AuthContext stores the profileResponse not LoginResponse...
-    },[])
+    },[refreshUser])
 
     const logout = useCallback((): void =>{
 
@@ -75,12 +75,11 @@ export function AuthProvider ({
         } finally{
             setLoading(false);
         }
-
-        useEffect(() => {
-            void initialize();
-        }, [initialize]);
-
     },[refreshUser])
+    
+    useEffect(() => {
+        void initialize();
+    }, [initialize]);
 
     // useMemo()-> We tell React: "Only recreate this object when one of its dependencies changes."
     // If any one changes, React creates a new object. Otherwise, React returns the previous object.

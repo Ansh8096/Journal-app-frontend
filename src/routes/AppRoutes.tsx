@@ -5,10 +5,11 @@ import ProfilePage from "@/pages/profile/ProfilePage";
 import ProtectedRoute from "@/routes/ProtectedRoute";
 import PublicRoute from "@/routes/PublicRoute";
 import { ROUTES } from "@/constants/routes";
-import JournalPage from "@/pages/journal/JournalPage";
+import JournalPage from "@/pages/journal/MyJournalsPage";
 import SettingsPage from "@/pages/settings/SettingsPage";
-import DashBoardPage2 from "@/pages/dashboard/DashboardPage2";
-// import DashBoardPage from "@/pages/dashboard/DashBoardPage";
+import DashBoardPage from "@/pages/dashboard/DashboardPage";
+import CreateJournalPage from "@/pages/journal/CreateJournalPage";
+import JournalDetailsPage from "@/pages/journal/JournalDetailsPage";
 
 
 const AppRoutes = () => {
@@ -38,37 +39,46 @@ const AppRoutes = () => {
                     path={ROUTES.SIGNUP}
                     element={<SignupPage />}
                 />
+
             </Route>
             
             {/* Protected */}
             <Route element={<ProtectedRoute />}>
-                {/* <Route
-                    path={ROUTES.DASHBOARD}
-                    element={<DashBoardPage />}
-                /> */}
 
                 <Route
                     path={ROUTES.DASHBOARD }
-                    element={<DashBoardPage2 />}
+                    element={<DashBoardPage />}
                 />
+
                 <Route
                     path={ROUTES.PROFILE}
                     element={<ProfilePage />}
                 />
-            </Route>
-            
-            
-            
-            <Route
-                path={ROUTES.JOURNALS}
-                element={<JournalPage />}
-            />
 
-            <Route
-                path={ROUTES.SETTINGS}
-                element={<SettingsPage />}
-            />
+                <Route 
+                    path={ROUTES.JOURNAL_DETAILS}
+                    element={<JournalDetailsPage/>}
+                />
+                
+                <Route
+                    path={ROUTES.JOURNALS}
+                    element={<JournalPage />}
+                />
     
+                <Route
+                    path={ROUTES.SETTINGS}
+                    element={<SettingsPage />}
+                />
+        
+                <Route 
+                    path={ROUTES.NEW_JOURNAL}
+                    element={<CreateJournalPage/>}
+                />
+                
+
+
+            </Route>            
+            
           {/* 404 */}
             
             <Route

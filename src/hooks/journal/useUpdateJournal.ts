@@ -1,9 +1,18 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+    useMutation,
+    useQueryClient,
+} from "@tanstack/react-query";
 
 import journalService from "@/services/journal.service";
-import { journalKeys } from "@/lib/react-query/query-keys";
 
-import type { JournalResponse, UpdateJournalRequest } from "@/types/api/journal";
+import {
+    journalKeys,
+} from "@/lib/react-query/query-keys";
+
+import type {
+    JournalResponse,
+    UpdateJournalRequest,
+} from "@/types/api/journal";
 
 interface UpdateJournalVariables {
     journalId: string;
@@ -12,17 +21,14 @@ interface UpdateJournalVariables {
 }
 
 export function useUpdateJournal() {
-    // Think of queryClient as the manager of React Query's cache.
-    // It knows: What data is cached, Which queries are active, or Which queries should be refetched or removed
-    const queryClient = useQueryClient();
+    const queryClient =
+        useQueryClient();
 
-    // Unlike useQuery, which fetches data, useMutation is used for operations that change data.
     return useMutation<
         JournalResponse,
         Error,
         UpdateJournalVariables
     >({
-        // This is the function React Query runs when you call: mutation()
         mutationFn: ({
             journalId,
             request,
@@ -34,63 +40,64 @@ export function useUpdateJournal() {
                 images,
             ),
 
-        // This runs only after the API request succeeds
         onSuccess: (
             updatedJournal,
         ) => {
-
-
-            /**
-             * --------------------------------------------------------------
-             * DETAIL CACHE
-             * --------------------------------------------------------------
-             *
-             * The API has already returned the
-             * complete updated JournalResponse.
-             *
-             * Therefore we don't need another
-             * GET /journals/:id request.
+            /*
+             * ----------------------------------------
+             * 1. UPDATE DETAIL CACHE
+             * ----------------------------------------
              */
-
             queryClient.setQueryData(
                 journalKeys.detail(
                     updatedJournal.id,
                 ),
-
                 updatedJournal,
             );
 
-            /**
-             * --------------------------------------------------------------
-             * LIST CACHE
-             * --------------------------------------------------------------
+            /*
+             * ----------------------------------------
+             * 2. REFRESH JOURNAL LISTS
+             * ----------------------------------------
              *
-             * There may be many cached list
-             * combinations:
-             *
-             * - different pages
-             * - search queries
-             * - moods
-             * - favorites
+             * The journal may have changed:
+             * - title
+             * - mood
+             * - favorite
              * - tags
-             * - date ranges
+             * - content
+             * - publishedAt
+             * - updatedAt
              *
-             * Manually updating all of them would
-             * be unnecessarily complicated.
-             *
-             * Mark the complete list family stale.
-             *
-             * Active list queries will refetch.
+             * So any cached list can now be stale.
              */
-
             queryClient.invalidateQueries({
                 queryKey:
                     journalKeys.lists(),
-
                 refetchType:
                     "active",
             });
 
+            /*
+             * ----------------------------------------
+             * 3. REFRESH JOURNAL STATISTICS
+             * ----------------------------------------
+             *
+             * Statistics can change when:
+             * - favorite changes
+             * - mood changes
+             * - a journal becomes relevant to
+             *   date-based statistics
+             *
+             * Therefore the statistics query must
+             * also be marked stale.
+             */
+            queryClient.invalidateQueries({
+                queryKey:
+                    journalKeys.statistics(),
+                refetchType:
+                    "active",
+            });
         },
     });
 }

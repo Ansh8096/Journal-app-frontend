@@ -15,29 +15,19 @@ import type {
     JournalResponse,
 } from "@/types/api/journal";
 
-
 export interface PublishDraftMutationVariables {
-    draftId:
-        string;
+    draftId: string;
 }
 
-
 export function usePublishDraft() {
-
     const queryClient =
         useQueryClient();
-
 
     return useMutation<
         JournalResponse,
         Error,
         PublishDraftMutationVariables
     >({
-
-        /* ------------------------------------------------------------------ */
-        /*                              MUTATION                              */
-        /* ------------------------------------------------------------------ */
-
         mutationFn: ({
             draftId,
         }) =>
@@ -45,28 +35,16 @@ export function usePublishDraft() {
                 draftId,
             ),
 
-
-        /* ------------------------------------------------------------------ */
-        /*                         CACHE SYNCHRONIZATION                      */
-        /* ------------------------------------------------------------------ */
-
         onSuccess: (
             publishedJournal,
             {
                 draftId,
             },
         ) => {
-
-            /**
-             * --------------------------------------------------------------
-             * 1. STORE PUBLISHED DETAIL
-             * --------------------------------------------------------------
-             *
-             * The publish endpoint returns the newly published
-             * JournalResponse.
-             *
-             * Put it directly into the published journal detail
-             * cache so Journal Details can render it immediately.
+            /*
+             * ----------------------------------------
+             * 1. UPDATE PUBLISHED JOURNAL DETAIL
+             * ----------------------------------------
              */
             queryClient.setQueryData(
                 journalKeys.detail(
@@ -75,53 +53,34 @@ export function usePublishDraft() {
                 publishedJournal,
             );
 
-
-            /**
-             * --------------------------------------------------------------
-             * 2. INVALIDATE PUBLISHED JOURNAL LISTS
-             * --------------------------------------------------------------
-             *
-             * The published journal has now entered the published
-             * journal collection.
+            /*
+             * ----------------------------------------
+             * 2. REFRESH PUBLISHED JOURNAL LISTS
+             * ----------------------------------------
              */
             queryClient.invalidateQueries({
                 queryKey:
                     journalKeys.lists(),
-
                 refetchType:
-                    "active",
+                    "all",
             });
 
-
-            /**
-             * --------------------------------------------------------------
-             * 3. INVALIDATE STATISTICS
-             * --------------------------------------------------------------
-             *
-             * If dashboard statistics contain published-journal
-             * counts, publishing a draft changes those statistics.
+            /*
+             * ----------------------------------------
+             * 3. REFRESH JOURNAL STATISTICS
+             * ----------------------------------------
              */
             queryClient.invalidateQueries({
                 queryKey:
                     journalKeys.statistics(),
-
                 refetchType:
-                    "active",
+                    "all",
             });
 
-
-            /**
-             * --------------------------------------------------------------
-             * 4. REMOVE OLD DRAFT DETAIL CACHE
-             * --------------------------------------------------------------
-             *
-             * This resource is no longer a draft.
-             *
-             * Don't leave:
-             *
-             * ["drafts", "detail", draftId]
-             *
-             * sitting around as if the draft still exists.
+            /*
+             * ----------------------------------------
+             * 4. REMOVE OLD DRAFT DETAIL
+             * ----------------------------------------
              */
             queryClient.removeQueries({
                 queryKey:
@@ -130,20 +89,26 @@ export function usePublishDraft() {
                     ),
             });
 
-
-            /**
-             * --------------------------------------------------------------
-             * 5. INVALIDATE DRAFT LISTS
-             * --------------------------------------------------------------
+            /*
+             * ----------------------------------------
+             * 5. REFRESH ALL DRAFT QUERIES
+             * ----------------------------------------
              *
-             * The published draft must disappear from any draft list.
+             * Publishing removes this journal from
+             * the draft domain entirely.
+             *
+             * This refreshes:
+             * - All Drafts
+             * - Drafts Overview
+             * - Recent Activity
+             * - Continue Writing
+             * - other draft queries
              */
             queryClient.invalidateQueries({
                 queryKey:
-                    draftKeys.lists(),
-
+                    draftKeys.all,
                 refetchType:
-                    "active",
+                    "all",
             });
         },
     });

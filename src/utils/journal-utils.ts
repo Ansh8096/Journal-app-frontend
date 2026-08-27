@@ -4,26 +4,8 @@ import { journalListUI, journalMoodConfig } from "@/components/journal/list/Jour
 
 import type { JournalStatisticsResponse } from "@/types/api/journal";
 
-import { journalConstants } from "@/constants/journal/journal-constants";
-
 import { formatDate } from "./date";
 
-// ======================
-// Search Utilities
-// ======================
-
-
-export function normalizeSearchQuery(query: string): string {
-    return query.trim();
-}
-
-
-export function isSearchQueryValid(query: string): boolean {
-    return (
-        normalizeSearchQuery(query).length >=
-        journalConstants.search.minQueryLength
-    );
-}
 
 // ======================
 // Journal Stats Utilities
@@ -120,12 +102,6 @@ export function getJournalDateTime(date: string) {
     };
 }
 
-export function getJournalWordCount(content: string): number {
-    return content
-        .trim()
-        .split(/\s+/)
-        .filter(Boolean).length;
-}
 
 export function getJournalImageCount(images: unknown[]): number {
     return images.length;

@@ -15,29 +15,20 @@ import type {
     JournalResponse,
 } from "@/types/api/journal";
 
-
 export interface CreateDraftMutationVariables {
-
-    request:
-        CreateDraftRequest;
-
-    images?:
-        File[];
+    request: CreateDraftRequest;
+    images?: File[];
 }
 
-
 export function useCreateDraft() {
-
     const queryClient =
         useQueryClient();
-
 
     return useMutation<
         JournalResponse,
         Error,
         CreateDraftMutationVariables
     >({
-
         mutationFn: ({
             request,
             images,
@@ -47,11 +38,13 @@ export function useCreateDraft() {
                 images,
             ),
 
-
         onSuccess: (
             createdDraft,
         ) => {
-
+            /*
+             * Update the newly-created
+             * draft detail immediately.
+             */
             queryClient.setQueryData(
                 draftKeys.detail(
                     createdDraft.id,
@@ -59,9 +52,21 @@ export function useCreateDraft() {
                 createdDraft,
             );
 
+            /*
+             * Refresh EVERY draft-related
+             * query:
+             *
+             * - All Drafts
+             * - Drafts Overview
+             * - Recent Activity
+             * - Continue Writing
+             * - other draft queries
+             */
             queryClient.invalidateQueries({
-                queryKey: draftKeys.lists(),
-                refetchType: "active",
+                queryKey:
+                    draftKeys.all,
+                refetchType:
+                    "all",
             });
         },
     });

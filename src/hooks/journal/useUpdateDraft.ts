@@ -15,36 +15,24 @@ import type {
     UpdateDraftRequest,
 } from "@/types/api/journal";
 
-
 export interface UpdateDraftMutationVariables {
-
-    draftId:
-        string;
+    draftId: string;
 
     request:
         UpdateDraftRequest;
 
-    images?:
-        File[];
+    images?: File[];
 }
 
-
 export function useUpdateDraft() {
-
     const queryClient =
         useQueryClient();
-
 
     return useMutation<
         JournalResponse,
         Error,
         UpdateDraftMutationVariables
     >({
-
-        /* ------------------------------------------------------------------ */
-        /*                              MUTATION                              */
-        /* ------------------------------------------------------------------ */
-
         mutationFn: ({
             draftId,
             request,
@@ -56,24 +44,12 @@ export function useUpdateDraft() {
                 images,
             ),
 
-
-        /* ------------------------------------------------------------------ */
-        /*                         CACHE SYNCHRONIZATION                      */
-        /* ------------------------------------------------------------------ */
-
         onSuccess: (
             updatedDraft,
         ) => {
-
-            /**
-             * --------------------------------------------------------------
-             * DRAFT DETAIL CACHE
-             * --------------------------------------------------------------
-             *
-             * The PATCH response already contains the complete
-             * updated JournalResponse.
-             *
-             * Don't immediately GET the same draft again.
+            /*
+             * Update the currently edited
+             * draft immediately.
              */
             queryClient.setQueryData(
                 draftKeys.detail(
@@ -82,31 +58,22 @@ export function useUpdateDraft() {
                 updatedDraft,
             );
 
-
-            /**
-             * --------------------------------------------------------------
-             * DRAFT LIST CACHE
-             * --------------------------------------------------------------
+            /*
+             * A draft update can affect:
+             * - Drafts Overview
+             * - All Drafts
+             * - Recent Activity
+             * - Continue Writing
+             * - Draft detail queries
              *
-             * There may eventually be different draft list
-             * combinations:
-             *
-             * - pagination
-             * - search
-             * - tags
-             * - date filters
-             *
-             * Invalidate the family instead of manually
-             * modifying every possible list.
-             *
-             * Only active lists refetch immediately.
+             * Therefore invalidate the
+             * complete draft query family.
              */
             queryClient.invalidateQueries({
                 queryKey:
-                    draftKeys.lists(),
-
+                    draftKeys.all,
                 refetchType:
-                    "active",
+                    "all",
             });
         },
     });

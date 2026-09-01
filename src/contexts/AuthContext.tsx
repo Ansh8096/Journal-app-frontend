@@ -7,103 +7,234 @@ import {
     type ReactNode,
 } from "react";
 
-import authService from "@/services/auth.service";
-import userService from "@/services/user.service";
+import authService
+    from "@/services/auth.service";
 
-import type { LoginRequest } from "@/types/api/auth";
-import type { UserProfile } from "@/types/api/user";
+import userService
+    from "@/services/user.service";
 
-import type { AuthContextType } from "./auth.types";
+import type {
+    LoginRequest,
+} from "@/types/api/auth";
 
-export const AuthContext = createContext<AuthContextType | undefined>(
-    undefined
-);
+import type {
+    UserProfile,
+} from "@/types/api/user";
+
+import type {
+    AuthContextType,
+} from "./auth.types";
+
+import {
+    queryClient,
+} from "@/lib/react-query/query-client";
+
+export const AuthContext =
+    createContext<
+        AuthContextType | undefined
+    >(undefined);
 
 interface AuthProviderProps {
     children: ReactNode;
 }
 
-export function AuthProvider ({
+export function AuthProvider({
     children,
-} : AuthProviderProps){
+}: AuthProviderProps) {
 
-    const [user, setUser] = useState<UserProfile | null>(null);
-    const [loading, setLoading] = useState<boolean>(true);
-    const isAuthenticated = (user !== null);
+    const [
+        user,
+        setUser,
+    ] = useState<UserProfile | null>(
+        null,
+    );
 
-    // Using useCallback keeps the function reference stable...
-    const refreshUser = useCallback(async() : Promise<void> =>{
+    const [
+        loading,
+        setLoading,
+    ] = useState<boolean>(true);
 
-        const profile  = await userService.getProfile();
-        setUser(profile);
-        console.log("RefreshUser method called, user profile fetched: ", profile);
-        
-    },[])
+    const isAuthenticated =
+        user !== null;
 
-    const login = useCallback(
-        async (request : LoginRequest) : Promise<void>=>{
-            
-            await authService.login(request);
+    /*
+     * ----------------------------------------
+     * Restore current user
+     * ----------------------------------------
+     */
+    const refreshUser =
+        useCallback(
+            async (): Promise<void> => {
 
-            await refreshUser(); // we call this beacuse AuthContext stores the profileResponse not LoginResponse...
-    },[refreshUser])
+                const profile =
+                    await userService
+                        .getProfile();
 
-    const logout = useCallback((): void =>{
+                setUser(profile);
+            },
+            [],
+        );
 
-        authService.logout();
-        setUser(null);
+    /*
+     * ----------------------------------------
+     * Normal username/password login
+     * ----------------------------------------
+     */
+    const login =
+        useCallback(
+            async (
+                request: LoginRequest,
+            ): Promise<void> => {
 
-    }, [])
+                /*
+                 * Prevent previous account data
+                 * from surviving into the new session.
+                 */
+                queryClient.clear();
 
-    // We are not validating the token here, beacuse backend will do that...
-    const initialize = useCallback(async() : Promise<void> =>{
-    
-        if(!authService.isAuthenticated()){
-            setLoading(false);
+                await authService.login(
+                    request,
+                );
 
-            return;
-        }
+                await refreshUser();
+            },
+            [refreshUser],
+        );
 
-        try {
-            await refreshUser(); // it fetches the user profile...
+    /*
+     * ----------------------------------------
+     * Google login
+     * ----------------------------------------
+     *
+     * The OAuth callback reaches this method
+     * after the backend has authenticated the
+     * Google identity.
+     */
+    const loginWithGoogle =
+        useCallback(
+            async (): Promise<void> => {
 
-        } catch (error) {// suppose we get an error (like: jwt expired), we remove the invalid jwt immediately...
-            console.error("Failed to restore session:", error);
-            authService.logout();
-            setUser(null);
+                /*
+                 * Clear any cached data that might
+                 * belong to a previous account.
+                 */
+                queryClient.clear();
 
-        } finally{
-            setLoading(false);
-        }
-    },[refreshUser])
-    
+                /*
+                 * Exchange the temporary OAuth
+                 * cookie for the normal JournalFlow JWT.
+                 */
+                await authService
+                    .loginWithGoogle();
+
+                /*
+                 * Load the authenticated
+                 * JournalFlow user exactly like
+                 * normal login.
+                 */
+                await refreshUser();
+            },
+            [refreshUser],
+        );
+
+    /*
+     * ----------------------------------------
+     * Logout
+     * ----------------------------------------
+     */
+    const logout =
+        useCallback(
+            (): void => {
+
+                authService.logout();
+
+                setUser(null);
+
+                queryClient.clear();
+            },
+            [],
+        );
+
+    /*
+     * ----------------------------------------
+     * Initialize session
+     * ----------------------------------------
+     */
+    const initialize =
+        useCallback(
+            async (): Promise<void> => {
+
+                if (
+                    !authService
+                        .isAuthenticated()
+                ) {
+
+                    setLoading(false);
+
+                    return;
+                }
+
+                try {
+
+                    await refreshUser();
+
+                } catch (error) {
+
+                    console.error(
+                        "Failed to restore session:",
+                        error,
+                    );
+
+                    authService.logout();
+
+                    setUser(null);
+
+                    queryClient.clear();
+
+                } finally {
+
+                    setLoading(false);
+                }
+            },
+            [refreshUser],
+        );
+
     useEffect(() => {
         void initialize();
     }, [initialize]);
 
-    // useMemo()-> We tell React: "Only recreate this object when one of its dependencies changes."
-    // If any one changes, React creates a new object. Otherwise, React returns the previous object.
-    const value = useMemo<AuthContextType>(
-        ()=>({
-            user,
-            loading,
-            isAuthenticated,
-            login,
-            logout,
-            refreshUser,
-        }), [
-            user,
-            loading,
-            login,
-            logout,
-            refreshUser,
-            
-        ]
-    )
+    const value =
+        useMemo<AuthContextType>(
+            () => ({
+                user,
+
+                loading,
+
+                isAuthenticated,
+
+                login,
+
+                loginWithGoogle,
+
+                logout,
+
+                refreshUser,
+            }),
+            [
+                user,
+                loading,
+                login,
+                loginWithGoogle,
+                logout,
+                refreshUser,
+            ],
+        );
+
     return (
-        <AuthContext.Provider value={value}>
+        <AuthContext.Provider
+            value={value}
+        >
             {children}
         </AuthContext.Provider>
-    )
+    );
 }
-

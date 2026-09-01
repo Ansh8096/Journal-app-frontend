@@ -9,9 +9,14 @@ export interface AuthContextType {
 
     isAuthenticated: boolean;
 
-    login: (request: LoginRequest) => Promise<void>;
+    login: (
+        request: LoginRequest,
+    ) => Promise<void>;
+
+    loginWithGoogle: () => Promise<void>;
 
     logout: () => void;
 
     refreshUser: () => Promise<void>;
+    
 }

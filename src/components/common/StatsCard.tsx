@@ -18,7 +18,7 @@ export default function StatsCard({
     iconClassName = "text-muted-foreground",
 }: StatisticCardProps) {
     return (
-        <Card className="h-full transition-shadow hover:shadow-md">
+        <Card className="h-full transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg">
 
             <CardContent>
 
